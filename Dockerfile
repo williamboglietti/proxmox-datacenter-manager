@@ -38,7 +38,11 @@ RUN printf '%s\n' \
         > /etc/apt/sources.list.d/proxmox.sources
 
 # 4. Installe le méta-paquet orienté conteneur + l'interface web + la doc locale.
+# debian:*-slim exclut /usr/share/doc/* via dpkg ; on réinclut la doc HTML de PDM
+# (avant l'install) pour que le bouton « Documentation » (route /docs) soit servi.
 RUN apt-get update && \
+    echo 'path-include /usr/share/doc/proxmox-datacenter-manager/html/*' \
+        > /etc/dpkg/dpkg.cfg.d/pdm-docs && \
     apt-get install -y --no-install-recommends \
         proxmox-datacenter-manager-container-meta \
         proxmox-datacenter-manager-ui \

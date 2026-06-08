@@ -27,6 +27,7 @@ Les tags suivent la version PDM amont (ex. `1.1.4`, `1.1`, `latest`).
 ```bash
 docker run -d --name pdm \
   -p 8443:8443 \
+  --hostname pdm \
   --tmpfs /run:exec,mode=0755 \
   -e PDM_ROOT_PASSWORD=change-me \
   -v pdm-config:/etc/proxmox-datacenter-manager \
@@ -34,8 +35,11 @@ docker run -d --name pdm \
   ghcr.io/williamboglietti/proxmox-datacenter-manager:latest
 ```
 
-`--tmpfs /run` n'est pas obligatoire mais reproduit le `/run` d'un vrai système
-et évite l'avertissement `shmem is not on tmpfs` côté PDM.
+`--hostname pdm` définit le nom du nœud affiché par PDM (sinon c'est l'ID du
+conteneur). Ne pas utiliser de variable d'environnement pour cela : changer le
+hostname au runtime exige `CAP_SYS_ADMIN`, alors que `--hostname` le règle sans
+privilège. `--tmpfs /run` n'est pas obligatoire mais reproduit le `/run` d'un
+vrai système et évite l'avertissement `shmem is not on tmpfs` côté PDM.
 
 ### Docker Compose
 
@@ -166,6 +170,7 @@ Tags follow the upstream PDM version (e.g. `1.1.4`, `1.1`, `latest`).
 ```bash
 docker run -d --name pdm \
   -p 8443:8443 \
+  --hostname pdm \
   --tmpfs /run:exec,mode=0755 \
   -e PDM_ROOT_PASSWORD=change-me \
   -v pdm-config:/etc/proxmox-datacenter-manager \
@@ -173,8 +178,11 @@ docker run -d --name pdm \
   ghcr.io/williamboglietti/proxmox-datacenter-manager:latest
 ```
 
-`--tmpfs /run` is optional but mirrors a real system's `/run` and avoids PDM's
-`shmem is not on tmpfs` warning.
+`--hostname pdm` sets the node name shown by PDM (otherwise it's the container
+ID). Don't use an environment variable for this: changing the hostname at
+runtime requires `CAP_SYS_ADMIN`, whereas `--hostname` sets it without any
+privilege. `--tmpfs /run` is optional but mirrors a real system's `/run` and
+avoids PDM's `shmem is not on tmpfs` warning.
 
 #### Docker Compose
 

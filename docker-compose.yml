@@ -6,6 +6,7 @@ services:
     # En développement local, commenter l'image ci-dessus et décommenter :
     # build: .
     container_name: pdm
+    hostname: pdm                   # nom du nœud affiché par PDM (sinon = ID du conteneur)
     platform: linux/amd64           # PDM est disponible en amd64 uniquement
     restart: unless-stopped
     ports:

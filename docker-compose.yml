@@ -14,7 +14,8 @@ services:
     # DNS du conteneur (sinon hérité du démon Docker). Reflété tel quel dans l'UI PDM.
     dns:
       - 1.1.1.1
-      # - 9.9.9.9
+      # - 8.8.8.8
+      - 9.9.9.9
     # dns_search:
     #   - lan.local
     environment:

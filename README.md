@@ -74,14 +74,6 @@ docker exec -it pdm passwd
 docker restart pdm
 ```
 
-### Masquer le popup d'abonnement
-
-Avec `DISABLE_SUBSCRIPTION_NAG=true`, le point d'entrée ajoute à `index.hbs` un
-intercepteur `fetch` qui réécrit la réponse de `/nodes/localhost/subscription`
-(`status` → `active`), ce qui empêche l'affichage du popup. Les binaires serveur
-ne sont pas modifiés et le réglage est réversible (repasser la variable à `false`
-puis redémarrer).
-
 ## Mises à jour
 
 PDM se met à jour **en changeant d'image**, pas via `apt` dans le conteneur :
@@ -222,14 +214,6 @@ If `PDM_ROOT_PASSWORD` is not provided, set the password manually:
 docker exec -it pdm passwd
 docker restart pdm
 ```
-
-#### Hiding the subscription dialog
-
-When `DISABLE_SUBSCRIPTION_NAG=true`, the entrypoint appends a small `fetch`
-interceptor to `index.hbs` that rewrites the response of
-`/nodes/localhost/subscription` (`status` → `active`), which prevents the dialog
-from being shown. The server binaries are not modified, and the change is
-reversible (set the variable back to `false` and restart).
 
 #### Updates
 

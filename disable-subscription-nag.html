@@ -1,0 +1,30 @@
+<!-- pdm-disable-subscription-nag -->
+<script>
+// Masque le popup "Aucun abonnement en cours de validité".
+// L'alerte (proxmox-yew-comp/subscription_alert.rs, compilée dans le bundle WASM)
+// s'affiche quand /api2/json/nodes/localhost/subscription renvoie data.status != "active".
+// Script classique : il s'exécute avant le module WASM (deferred), donc window.fetch
+// est patché à temps ; seule la réponse de l'endpoint d'abonnement est réécrite.
+(function () {
+  if (window.__pdmNoNag) return;
+  window.__pdmNoNag = true;
+  var orig = window.fetch.bind(window);
+  window.fetch = function (input, init) {
+    return orig(input, init).then(function (res) {
+      var url = typeof input === "string" ? input : (input && input.url) || "";
+      if (url.indexOf("/nodes/localhost/subscription") === -1) return res;
+      return res.clone().json().then(function (body) {
+        if (body && body.data && typeof body.data === "object" && "status" in body.data) {
+          body.data.status = "active";
+          return new Response(JSON.stringify(body), {
+            status: res.status,
+            statusText: res.statusText,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return res;
+      }).catch(function () { return res; });
+    });
+  };
+})();
+</script>

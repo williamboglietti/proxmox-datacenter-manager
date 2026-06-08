@@ -7,14 +7,25 @@
 // Pas d'ancre CSS unique ici (boutons « Éditer » sans icône, classes de panel
 // partagées) : on agit en JS, scopé à la route, sur les panneaux frères.
 //  - panneau avec une barre d'outils (> 1 bouton) = « Interfaces réseau » -> masqué
-//  - panneau avec un seul bouton « Éditer » = Heure / DNS -> barre masquée +
-//    pointer-events:none (bloque le bouton ET le double-clic d'édition sur la ligne)
+//  - panneau avec un seul bouton « Éditer » = Heure / DNS -> on masque le bouton
+//    et on effondre la toolbar à hauteur 0 en gardant sa bordure
+//    pwt-border-bottom (= la barre de séparation sous le titre, sinon une
+//    toolbar vide laisse un gros espace) + pointer-events:none sur la table
+//    (bloque le double-clic d'édition sur la ligne).
 (function () {
   if (window.__pdmNetLock) return;
   window.__pdmNetLock = true;
 
+  // La vue « Réseau et heure » s'affiche à #/configuration/network MAIS aussi à
+  // #/configuration (onglet par défaut, l'URL ne contient alors pas /network) :
+  // se limiter à /network laisse la vue par défaut non masquée. On couvre les deux.
+  function onNetworkView() {
+    var h = location.hash.replace(/\?.*$/, '').replace(/\/+$/, '');
+    return h === '#/configuration' || h.indexOf('/configuration/network') !== -1;
+  }
+
   function lock() {
-    if (location.hash.indexOf('/configuration/network') === -1) return;
+    if (!onNetworkView()) return;
     document.querySelectorAll('.pwt-content-spacer.pwt-flex-fit').forEach(function (sp) {
       var panels = sp.querySelectorAll(':scope > .pwt-panel');
       if (panels.length < 3) return; // pas la vue attendue
@@ -26,8 +37,17 @@
         if (btns.length > 1) {
           panel.style.display = 'none';
         } else {
+          // Masquer le bouton « Éditer » et effondrer la toolbar à hauteur 0 en
+          // gardant sa bordure (= la barre de séparation) : une toolbar vide non
+          // effondrée laisserait un gros espace entre le titre et la ligne.
+          btns.forEach(function (b) { b.style.display = 'none'; });
           var tb = panel.querySelector('.pwt-toolbar');
-          if (tb) tb.style.display = 'none';
+          if (tb) {
+            tb.style.minHeight = '0';
+            tb.style.height = '0';
+            tb.style.padding = '0';
+            tb.style.overflow = 'hidden';
+          }
           var dt = panel.querySelector('.pwt-datatable') || panel;
           if (dt) dt.style.pointerEvents = 'none';
         }

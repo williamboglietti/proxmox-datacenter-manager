@@ -65,6 +65,23 @@ if [[ -f "$INDEX_HBS" ]]; then
     fi
 fi
 
+# --- 3b. Option : désactiver le dépôt apt enterprise (401 sans abonnement) ------
+# Le paquet container-meta ajoute pdm-enterprise.sources, inutile sur une install
+# no-subscription : il fait échouer chaque `apt update` (401 Unauthorized).
+ENTERPRISE_SOURCES="/etc/apt/sources.list.d/pdm-enterprise.sources"
+if [[ -f "$ENTERPRISE_SOURCES" ]]; then
+    if [[ "${DISABLE_ENTERPRISE_REPO:-false}" == "true" ]]; then
+        if ! grep -q '^Enabled: no' "$ENTERPRISE_SOURCES"; then
+            log "DISABLE_ENTERPRISE_REPO=true: disabling the enterprise apt repository."
+            printf 'Enabled: no\n' >> "$ENTERPRISE_SOURCES"
+        fi
+    elif grep -q '^Enabled: no' "$ENTERPRISE_SOURCES"; then
+        # Toggle off : on réactive le dépôt précédemment désactivé.
+        log "DISABLE_ENTERPRISE_REPO disabled: re-enabling the enterprise apt repository."
+        sed -i '/^Enabled: no$/d' "$ENTERPRISE_SOURCES"
+    fi
+fi
+
 # --- 4. Génération clés/certs (sous-commande officielle, idempotente) ----------
 # Remplace l'ExecStartPre systemd ; crée les clés d'auth et le certificat si absents.
 log "Running PDM setup..."

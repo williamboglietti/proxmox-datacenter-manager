@@ -19,6 +19,7 @@ RUN apt-get update && \
         wget \
         ca-certificates \
         procps \
+        iproute2 \
         tini && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 

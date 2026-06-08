@@ -35,16 +35,18 @@ run_logged() {
 }
 trap cleanup SIGTERM SIGINT
 
-# --- 1. Mot de passe root (root@pam), idempotent ------------------------------
-PW_MARKER="$CONFIG_DIR/.root-pw-applied"
+# --- 1. Mot de passe root (root@pam), déclaratif -------------------------------
+# Appliqué à CHAQUE démarrage si PDM_ROOT_PASSWORD est défini : /etc/shadow vit
+# dans la couche conteneur (volatile), donc un marqueur dans le volume mènerait
+# à un mot de passe perdu au recreate mais jamais réappliqué. La variable est la
+# source de vérité (comme TZ) ; un mot de passe posé via `passwd` serait réécrit.
 mkdir -p "$CONFIG_DIR"
-if [[ -n "${PDM_ROOT_PASSWORD:-}" && ! -f "$PW_MARKER" ]]; then
+if [[ -n "${PDM_ROOT_PASSWORD:-}" ]]; then
     log "Setting root@pam password from PDM_ROOT_PASSWORD..."
     echo "root:${PDM_ROOT_PASSWORD}" | chpasswd
-    touch "$PW_MARKER"
-elif [[ ! -f "$PW_MARKER" ]]; then
-    warn "PDM_ROOT_PASSWORD is not set. Set the password with:"
-    warn "  docker exec -it <container> passwd   then   docker restart <container>"
+else
+    warn "PDM_ROOT_PASSWORD is not set. Set it with: docker exec -it <container> passwd"
+    warn "(a password set manually is lost on recreate — prefer PDM_ROOT_PASSWORD)."
 fi
 
 # --- 2. Permissions sur les volumes montés ------------------------------------

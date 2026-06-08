@@ -23,7 +23,7 @@ services:
     # dns_search:
     #   - lan.local
     environment:
-      # Mot de passe root@pam, appliqué au premier démarrage. À changer.
+      # Mot de passe root@pam, (ré)appliqué à chaque démarrage. À changer.
       PDM_ROOT_PASSWORD: "change-me"
       # Masquer le popup "Aucun abonnement en cours de validité" (true/false).
       DISABLE_SUBSCRIPTION_NAG: "true"

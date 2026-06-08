@@ -58,7 +58,7 @@ Ouvrir `https://<hôte>:8443` (certificat auto-signé) et se connecter avec le r
 
 | Variable                   | Défaut  | Description                                                       |
 | -------------------------- | ------- | ---------------------------------------------------------------- |
-| `PDM_ROOT_PASSWORD`        | —       | Mot de passe `root@pam`, appliqué au premier démarrage.          |
+| `PDM_ROOT_PASSWORD`        | —       | Mot de passe `root@pam`, (ré)appliqué à chaque démarrage.        |
 | `PDM_PORT`                 | `8443`  | Port HTTPS de l'UI/API.                                          |
 | `DISABLE_SUBSCRIPTION_NAG` | `false` | Si `true`, masque le popup « Aucun abonnement en cours de validité ». |
 | `DISABLE_UPDATES_TAB`      | `true`  | Masque l'onglet « Mises à jour » (les MAJ se font par image, voir ci-dessous). `false` pour le réafficher. |
@@ -199,7 +199,7 @@ realm and the configured password.
 
 | Variable                   | Default | Description                                            |
 | -------------------------- | ------- | ------------------------------------------------------ |
-| `PDM_ROOT_PASSWORD`        | —       | `root@pam` password, applied on first start.           |
+| `PDM_ROOT_PASSWORD`        | —       | `root@pam` password, (re)applied on every start.       |
 | `PDM_PORT`                 | `8443`  | HTTPS port for the UI/API.                             |
 | `DISABLE_SUBSCRIPTION_NAG` | `false` | When `true`, hides the "No valid subscription" dialog. |
 | `DISABLE_UPDATES_TAB`      | `true`  | Hides the "Updates" tab (updates are done by image, see below). Set `false` to show it again. |

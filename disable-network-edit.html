@@ -18,8 +18,10 @@
     document.querySelectorAll('.pwt-content-spacer.pwt-flex-fit').forEach(function (sp) {
       var panels = sp.querySelectorAll(':scope > .pwt-panel');
       if (panels.length < 3) return; // pas la vue attendue
+      // Réappliqué à chaque mutation (idempotent) : Yew crée d'abord le panneau
+      // vide puis le remplit ; un flag "déjà traité" se poserait trop tôt (avant
+      // que boutons/toolbar existent) et empêcherait le masquage réel.
       panels.forEach(function (panel) {
-        if (panel.dataset.pdmNetLocked) return;
         var btns = panel.querySelectorAll('button.pwt-button');
         if (btns.length > 1) {
           panel.style.display = 'none';
@@ -27,9 +29,8 @@
           var tb = panel.querySelector('.pwt-toolbar');
           if (tb) tb.style.display = 'none';
           var dt = panel.querySelector('.pwt-datatable') || panel;
-          dt.style.pointerEvents = 'none';
+          if (dt) dt.style.pointerEvents = 'none';
         }
-        panel.dataset.pdmNetLocked = '1';
       });
     });
   }

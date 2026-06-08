@@ -41,6 +41,9 @@ hostname au runtime exige `CAP_SYS_ADMIN`, alors que `--hostname` le règle sans
 privilège. `--tmpfs /run` n'est pas obligatoire mais reproduit le `/run` d'un
 vrai système et évite l'avertissement `shmem is not on tmpfs` côté PDM.
 
+Le DNS se configure côté Docker (`--dns 1.1.1.1 --dns-search lan.local`, ou les
+clés `dns:`/`dns_search:` en Compose) ; PDM affiche ces valeurs telles quelles.
+
 ### Docker Compose
 
 ```bash
@@ -186,6 +189,9 @@ ID). Don't use an environment variable for this: changing the hostname at
 runtime requires `CAP_SYS_ADMIN`, whereas `--hostname` sets it without any
 privilege. `--tmpfs /run` is optional but mirrors a real system's `/run` and
 avoids PDM's `shmem is not on tmpfs` warning.
+
+DNS is configured on the Docker side (`--dns 1.1.1.1 --dns-search lan.local`, or
+the `dns:`/`dns_search:` keys in Compose); PDM displays those values as-is.
 
 #### Docker Compose
 

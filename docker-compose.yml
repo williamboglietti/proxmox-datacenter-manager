@@ -11,6 +11,13 @@ services:
     restart: unless-stopped
     ports:
       - "8443:8443"                 # UI web HTTPS
+    # DNS du conteneur (sinon hérité du démon Docker). Reflété tel quel dans
+    # l'UI PDM. Décommenter pour forcer des serveurs/suffixes spécifiques.
+    # dns:
+    #   - 1.1.1.1
+    #   - 9.9.9.9
+    # dns_search:
+    #   - lan.local
     environment:
       # Mot de passe root@pam, appliqué au premier démarrage. À changer.
       PDM_ROOT_PASSWORD: "change-me"

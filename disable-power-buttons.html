@@ -1,0 +1,11 @@
+<style>
+/* Masque les boutons « Redémarrer » et « Arrêter » de la vue État du nœud.
+   Le cycle de vie d'un conteneur se gère via Docker (docker restart/stop), pas
+   via l'UI : ces boutons appellent systemctl reboot/poweroff, indisponible sans
+   systemd. Ciblage indépendant de la langue par icône (vérifié : 1 occurrence
+   chacune) — fa-power-off = Arrêter, fa-undo.pwt-color-warning = Redémarrer. */
+button.pwt-button:has(> span > .fa-power-off),
+button.pwt-button:has(> span > .fa-undo.pwt-color-warning) {
+  display: none !important;
+}
+</style>

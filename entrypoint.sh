@@ -65,6 +65,7 @@ chown -R www-data:www-data "$DATA_DIR"
 INDEX_HBS="/usr/share/javascript/proxmox-datacenter-manager/index.hbs"
 NAG_PATCH="/usr/local/share/pdm/disable-subscription-nag.html"
 UPDATES_PATCH="/usr/local/share/pdm/disable-updates-tab.html"
+POWER_PATCH="/usr/local/share/pdm/disable-power-buttons.html"
 
 apply_html_patch() { # $1=marqueur $2=fichier
     [[ -f "$INDEX_HBS" && -f "$2" ]] || return 0
@@ -105,6 +106,15 @@ if [[ "${DISABLE_UPDATES_TAB:-true}" == "true" ]]; then
     apply_html_patch "pdm-disable-updates-tab" "$UPDATES_PATCH"
 else
     remove_html_patch "pdm-disable-updates-tab"
+fi
+
+# 3c. Masquer les boutons "Redémarrer"/"Arrêter" (cycle de vie géré par Docker).
+# Défaut "true" : ils appellent systemctl reboot/poweroff, indisponible ici.
+if [[ "${DISABLE_POWER_BUTTONS:-true}" == "true" ]]; then
+    log "DISABLE_POWER_BUTTONS=true: hiding the Reboot/Shutdown buttons."
+    apply_html_patch "pdm-disable-power-buttons" "$POWER_PATCH"
+else
+    remove_html_patch "pdm-disable-power-buttons"
 fi
 
 # --- 4. journald standalone (alimente l'onglet « Journal système » de l'UI) ----

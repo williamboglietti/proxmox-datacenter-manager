@@ -55,6 +55,7 @@ Ouvrir `https://<hôte>:8443` (certificat auto-signé) et se connecter avec le r
 | `PDM_PORT`                 | `8443`  | Port HTTPS de l'UI/API.                                          |
 | `DISABLE_SUBSCRIPTION_NAG` | `false` | Si `true`, masque le popup « Aucun abonnement en cours de validité ». |
 | `DISABLE_UPDATES_TAB`      | `true`  | Masque l'onglet « Mises à jour » (les MAJ se font par image, voir ci-dessous). `false` pour le réafficher. |
+| `DISABLE_POWER_BUTTONS`    | `true`  | Masque les boutons « Redémarrer »/« Arrêter » (cycle de vie géré via Docker). `false` pour les réafficher. |
 
 Si `PDM_ROOT_PASSWORD` n'est pas fourni, définir le mot de passe manuellement :
 
@@ -193,6 +194,7 @@ realm and the configured password.
 | `PDM_PORT`                 | `8443`  | HTTPS port for the UI/API.                             |
 | `DISABLE_SUBSCRIPTION_NAG` | `false` | When `true`, hides the "No valid subscription" dialog. |
 | `DISABLE_UPDATES_TAB`      | `true`  | Hides the "Updates" tab (updates are done by image, see below). Set `false` to show it again. |
+| `DISABLE_POWER_BUTTONS`    | `true`  | Hides the "Reboot"/"Shutdown" buttons (lifecycle is managed via Docker). Set `false` to show them. |
 
 If `PDM_ROOT_PASSWORD` is not provided, set the password manually:
 

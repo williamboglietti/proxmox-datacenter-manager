@@ -61,6 +61,7 @@ RUN mkdir -p \
 
 COPY disable-subscription-nag.html /usr/local/share/pdm/disable-subscription-nag.html
 COPY disable-updates-tab.html /usr/local/share/pdm/disable-updates-tab.html
+COPY disable-power-buttons.html /usr/local/share/pdm/disable-power-buttons.html
 # Config journald (volatile, sans audit) ; le paquet systemd est déjà tiré par PDM.
 COPY journald.conf /etc/systemd/journald.conf
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh

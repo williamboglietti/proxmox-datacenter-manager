@@ -18,6 +18,8 @@ services:
       # Masquer l'onglet "Mises à jour" (MAJ par image, pas par apt) (true/false).
       # Défaut "true" : un upgrade apt depuis l'UI casserait le conteneur.
       DISABLE_UPDATES_TAB: "true"
+      # Masquer les boutons "Redémarrer"/"Arrêter" (géré via Docker) (true/false).
+      DISABLE_POWER_BUTTONS: "true"
       # Port HTTPS de l'UI (laisser 8443 sauf besoin spécifique).
       # PDM_PORT: "8443"
     # Alternative : déporter les variables ci-dessus dans un fichier .env

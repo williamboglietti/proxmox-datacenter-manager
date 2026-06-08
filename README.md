@@ -61,6 +61,8 @@ Ouvrir `https://<hôte>:8443` (certificat auto-signé) et se connecter avec le r
 | `DISABLE_UPDATES_TAB`      | `true`  | Masque l'onglet « Mises à jour » (les MAJ se font par image, voir ci-dessous). `false` pour le réafficher. |
 | `DISABLE_POWER_BUTTONS`    | `true`  | Masque les boutons « Redémarrer »/« Arrêter » (cycle de vie géré via Docker). `false` pour les réafficher. |
 | `DISABLE_SUBSCRIPTION_PANEL` | `true` | Masque l'entrée de menu « Abonnement » locale (sans intérêt ici). N'affecte pas « Subscription Registry ». `false` pour la réafficher. |
+| `DISABLE_NETWORK_EDIT`     | `true`  | Verrouille la vue « Réseau et heure » en lecture seule : retire l'édition heure/DNS et la section « Interfaces réseau » (gérés via Docker). |
+| `TZ`                       | —       | Fuseau horaire (ex. `Europe/Paris`), appliqué à chaque démarrage. |
 
 Si `PDM_ROOT_PASSWORD` n'est pas fourni, définir le mot de passe manuellement :
 
@@ -205,6 +207,8 @@ realm and the configured password.
 | `DISABLE_UPDATES_TAB`      | `true`  | Hides the "Updates" tab (updates are done by image, see below). Set `false` to show it again. |
 | `DISABLE_POWER_BUTTONS`    | `true`  | Hides the "Reboot"/"Shutdown" buttons (lifecycle is managed via Docker). Set `false` to show them. |
 | `DISABLE_SUBSCRIPTION_PANEL` | `true` | Hides the local "Subscription" menu entry (pointless here). Does not affect "Subscription Registry". Set `false` to show it. |
+| `DISABLE_NETWORK_EDIT`     | `true`  | Locks the "Network & Time" view read-only: removes time/DNS editing and the "Network Interfaces" section (managed via Docker). |
+| `TZ`                       | —       | Timezone (e.g. `Europe/Paris`), applied on every start. |
 
 If `PDM_ROOT_PASSWORD` is not provided, set the password manually:
 

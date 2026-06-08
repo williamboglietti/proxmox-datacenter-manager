@@ -1,0 +1,43 @@
+<script>
+// Vue « Réseau et heure » (#/configuration/network) : en conteneur, l'heure se
+// règle via TZ, le DNS via --dns, et le réseau via Docker — l'édition PDM est
+// soit volatile, soit dangereuse (« Appliquer » couperait eth0). On garde
+// l'affichage en lecture seule et on retire les moyens d'édition.
+//
+// Pas d'ancre CSS unique ici (boutons « Éditer » sans icône, classes de panel
+// partagées) : on agit en JS, scopé à la route, sur les panneaux frères.
+//  - panneau avec une barre d'outils (> 1 bouton) = « Interfaces réseau » -> masqué
+//  - panneau avec un seul bouton « Éditer » = Heure / DNS -> barre masquée +
+//    pointer-events:none (bloque le bouton ET le double-clic d'édition sur la ligne)
+(function () {
+  if (window.__pdmNetLock) return;
+  window.__pdmNetLock = true;
+
+  function lock() {
+    if (location.hash.indexOf('/configuration/network') === -1) return;
+    document.querySelectorAll('.pwt-content-spacer.pwt-flex-fit').forEach(function (sp) {
+      var panels = sp.querySelectorAll(':scope > .pwt-panel');
+      if (panels.length < 3) return; // pas la vue attendue
+      panels.forEach(function (panel) {
+        if (panel.dataset.pdmNetLocked) return;
+        var btns = panel.querySelectorAll('button.pwt-button');
+        if (btns.length > 1) {
+          panel.style.display = 'none';
+        } else {
+          var tb = panel.querySelector('.pwt-toolbar');
+          if (tb) tb.style.display = 'none';
+          var dt = panel.querySelector('.pwt-datatable') || panel;
+          dt.style.pointerEvents = 'none';
+        }
+        panel.dataset.pdmNetLocked = '1';
+      });
+    });
+  }
+
+  // L'UI (Yew/WASM) construit la vue dynamiquement ; on réapplique sur mutation.
+  new MutationObserver(lock).observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener('hashchange', lock);
+  if (document.readyState !== 'loading') lock();
+  else document.addEventListener('DOMContentLoaded', lock);
+})();
+</script>

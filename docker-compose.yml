@@ -24,6 +24,11 @@ services:
       # Masquer l'entrée de menu "Abonnement" locale (true/false). Ne touche pas
       # à "Subscription Registry" (gestion des abonnements des remotes).
       DISABLE_SUBSCRIPTION_PANEL: "true"
+      # Vue "Réseau et heure" en lecture seule : retire l'édition heure/DNS et la
+      # section Interfaces réseau (gérés via Docker) (true/false).
+      DISABLE_NETWORK_EDIT: "true"
+      # Fuseau horaire (ex: Europe/Paris), appliqué à chaque démarrage.
+      # TZ: "Europe/Paris"
       # Port HTTPS de l'UI (laisser 8443 sauf besoin spécifique).
       # PDM_PORT: "8443"
     # Alternative : déporter les variables ci-dessus dans un fichier .env

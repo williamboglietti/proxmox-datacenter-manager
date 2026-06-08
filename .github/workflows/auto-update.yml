@@ -1,0 +1,78 @@
+name: Auto-update PDM image
+
+# Hebdomadaire : compare la dernière version PDM du dépôt no-subscription à
+# celle embarquée dans l'image `latest`. Ne rebuild/publie que si elles diffèrent
+# (le rebuild est délégué au workflow docker-publish, qui dérive les tags de la
+# version PDM réellement installée).
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # tous les lundis à 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      needs_update: ${{ steps.cmp.outputs.needs_update }}
+      available: ${{ steps.avail.outputs.version }}
+      current: ${{ steps.current.outputs.version }}
+    steps:
+      - name: Latest PDM version available in the repo
+        id: avail
+        run: |
+          set -euo pipefail
+          VERSION=$(docker run --rm debian:trixie-slim bash -c '
+            set -e
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update -qq
+            apt-get install -y -qq --no-install-recommends wget ca-certificates >/dev/null
+            wget -qO /usr/share/keyrings/proxmox-archive-keyring.gpg \
+              https://enterprise.proxmox.com/debian/proxmox-archive-keyring-trixie.gpg
+            printf "%s\n" \
+              "Types: deb" \
+              "URIs: http://download.proxmox.com/debian/pdm" \
+              "Suites: trixie" \
+              "Components: pdm-no-subscription" \
+              "Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg" \
+              > /etc/apt/sources.list.d/proxmox.sources
+            apt-get update -qq
+            apt-cache policy proxmox-datacenter-manager | awk "/Candidate:/ {print \$2}"
+          ')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Available PDM version: $VERSION"
+
+      - name: PDM version in the current latest image
+        id: current
+        run: |
+          set -euo pipefail
+          IMAGE=ghcr.io/${{ github.repository_owner }}/proxmox-datacenter-manager:latest
+          docker pull -q "$IMAGE"
+          VERSION=$(docker run --rm --entrypoint dpkg-query "$IMAGE" \
+            -W -f='${Version}' proxmox-datacenter-manager)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Current image PDM version: $VERSION"
+
+      - name: Compare
+        id: cmp
+        run: |
+          set -euo pipefail
+          if [ "${{ steps.avail.outputs.version }}" != "${{ steps.current.outputs.version }}" ]; then
+            echo "needs_update=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Nouvelle version PDM ${{ steps.avail.outputs.version }} (image actuelle : ${{ steps.current.outputs.version }}) -> rebuild."
+          else
+            echo "needs_update=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Image déjà à jour (PDM ${{ steps.current.outputs.version }})."
+          fi
+
+  publish:
+    needs: check
+    if: needs.check.outputs.needs_update == 'true'
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker-publish.yml
+    secrets: inherit

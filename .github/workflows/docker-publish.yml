@@ -10,6 +10,7 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+  workflow_call: # appelé par auto-update.yml quand une nouvelle version PDM sort
 
 env:
   IMAGE_NAME: proxmox-datacenter-manager

@@ -1,5 +1,10 @@
 name: Build & Publish Docker image
 
+# Les tags d'image sont dérivés de la version PDM réellement installée dans
+# l'image (dpkg-query), pas du tag git. Le tag git ne sert qu'à déclencher une
+# release ; s'il porte une version (vX.Y.Z[-rev]), elle DOIT correspondre à la
+# version PDM, sinon le build échoue (garde-fou anti-désalignement).
+
 on:
   push:
     tags:
@@ -35,25 +40,59 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: |
-            ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
-            docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest
-
-      - name: Build & push
+      - name: Build image (load locally, no push yet)
         uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          load: true
+          tags: pdm-ci:build
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Derive tags from the installed PDM version
+        id: ver
+        run: |
+          set -euo pipefail
+          PDM_VER=$(docker run --rm --entrypoint dpkg-query pdm-ci:build \
+            -W -f='${Version}' proxmox-datacenter-manager)
+          # Version upstream pure : retire un éventuel suffixe de révision Debian.
+          PDM_VER=${PDM_VER%%[-+]*}
+          PDM_MM=${PDM_VER%.*}
+          echo "pdm=$PDM_VER"   >> "$GITHUB_OUTPUT"
+          echo "mm=$PDM_MM"     >> "$GITHUB_OUTPUT"
+          echo "PDM version installée : $PDM_VER (minor série $PDM_MM)"
+
+          # Garde-fou : un tag git vX.Y.Z[-rev] doit s'aligner sur la version PDM.
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            GIT_VER=${GITHUB_REF_NAME#v}
+            GIT_BASE=${GIT_VER%%-*}
+            if [ "$GIT_BASE" != "$PDM_VER" ]; then
+              echo "::error::Tag git ${GITHUB_REF_NAME} (base ${GIT_BASE}) ≠ version PDM ${PDM_VER}. Aligne le tag sur la version PDM embarquée."
+              exit 1
+            fi
+            echo "release=$GIT_VER" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Tag & push
+        env:
+          GHCR: ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+          DH: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+          PDM: ${{ steps.ver.outputs.pdm }}
+          MM: ${{ steps.ver.outputs.mm }}
+          RELEASE: ${{ steps.ver.outputs.release }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          SHORT=${GIT_SHA:0:7}
+          # Tags toujours produits : version PDM exacte, série mineure, latest, sha immuable.
+          TAGS="$PDM $MM latest sha-$SHORT"
+          # Tag git de release (ex. 1.1.4-2) s'il a été fourni et validé.
+          [ -n "${RELEASE:-}" ] && TAGS="$TAGS $RELEASE"
+          echo "Tags poussés : $TAGS"
+          for reg in "$GHCR" "$DH"; do
+            for t in $TAGS; do
+              docker tag pdm-ci:build "$reg:$t"
+              docker push "$reg:$t"
+            done
+          done

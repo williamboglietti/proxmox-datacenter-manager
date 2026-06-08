@@ -1,0 +1,10 @@
+<style>
+/* Masque l'entrée de menu « Abonnement » (Configuration > Abonnement), càd
+   l'abonnement du PDM local : sans intérêt ici (support non couvert sur ce
+   conteneur non-officiel, MAJ par image, et le nag est géré séparément).
+   N'affecte PAS « Subscription Registry » (gestion des remotes), qui reste utile.
+   Ciblage indépendant de la langue : ce lien est le seul à porter fa-support. */
+a.pwt-nav-link:has(> i.fa-support) {
+  display: none !important;
+}
+</style>

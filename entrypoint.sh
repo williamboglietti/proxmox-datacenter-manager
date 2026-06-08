@@ -66,6 +66,7 @@ INDEX_HBS="/usr/share/javascript/proxmox-datacenter-manager/index.hbs"
 NAG_PATCH="/usr/local/share/pdm/disable-subscription-nag.html"
 UPDATES_PATCH="/usr/local/share/pdm/disable-updates-tab.html"
 POWER_PATCH="/usr/local/share/pdm/disable-power-buttons.html"
+SUB_PANEL_PATCH="/usr/local/share/pdm/disable-subscription-panel.html"
 
 apply_html_patch() { # $1=marqueur $2=fichier
     [[ -f "$INDEX_HBS" && -f "$2" ]] || return 0
@@ -115,6 +116,15 @@ if [[ "${DISABLE_POWER_BUTTONS:-true}" == "true" ]]; then
     apply_html_patch "pdm-disable-power-buttons" "$POWER_PATCH"
 else
     remove_html_patch "pdm-disable-power-buttons"
+fi
+
+# 3d. Masquer l'entrée de menu "Abonnement" locale (inutile sur ce conteneur).
+# Défaut "true" ; ne touche pas à "Subscription Registry" (gestion des remotes).
+if [[ "${DISABLE_SUBSCRIPTION_PANEL:-true}" == "true" ]]; then
+    log "DISABLE_SUBSCRIPTION_PANEL=true: hiding the Subscription menu entry."
+    apply_html_patch "pdm-disable-subscription-panel" "$SUB_PANEL_PATCH"
+else
+    remove_html_patch "pdm-disable-subscription-panel"
 fi
 
 # --- 4. journald standalone (alimente l'onglet « Journal système » de l'UI) ----

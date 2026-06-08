@@ -44,7 +44,9 @@ RUN apt-get update && \
         proxmox-datacenter-manager-ui && \
     # container-meta ajoute le dépôt enterprise : inutile sur une image
     # no-subscription (401 sur apt update) et trompeur — on le retire.
-    rm -f /etc/apt/sources.list.d/pdm-enterprise.sources && \
+    # debian.sources : inutile au runtime (aucune MAJ par apt) — TEST de retrait.
+    rm -f /etc/apt/sources.list.d/pdm-enterprise.sources \
+          /etc/apt/sources.list.d/debian.sources && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 5. Dossiers runtime et de persistance.

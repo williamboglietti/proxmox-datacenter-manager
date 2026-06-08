@@ -50,6 +50,7 @@ Ouvrir `https://<hôte>:8443` (certificat auto-signé) et se connecter avec le r
 | `PDM_ROOT_PASSWORD`        | —       | Mot de passe `root@pam`, appliqué au premier démarrage.          |
 | `PDM_PORT`                 | `8443`  | Port HTTPS de l'UI/API.                                          |
 | `DISABLE_SUBSCRIPTION_NAG` | `false` | Si `true`, masque le popup « Aucun abonnement en cours de validité ». |
+| `DISABLE_UPDATES_TAB`      | `false` | Si `true`, masque l'onglet « Mises à jour » (les MAJ se font par image, voir ci-dessous). |
 | `DISABLE_ENTERPRISE_REPO`  | `false` | Si `true`, désactive le dépôt apt enterprise (évite les 401 sur `apt update` sans abonnement). |
 
 Si `PDM_ROOT_PASSWORD` n'est pas fourni, définir le mot de passe manuellement :
@@ -66,6 +67,25 @@ intercepteur `fetch` qui réécrit la réponse de `/nodes/localhost/subscription
 (`status` → `active`), ce qui empêche l'affichage du popup. Les binaires serveur
 ne sont pas modifiés et le réglage est réversible (repasser la variable à `false`
 puis redémarrer).
+
+## Mises à jour
+
+PDM se met à jour **en changeant d'image**, pas via `apt` dans le conteneur :
+un `apt upgrade` lancé depuis l'onglet « Mises à jour » serait écrit dans la
+couche du conteneur (perdu au prochain recreate) et peut échouer faute de
+systemd. C'est pourquoi `DISABLE_UPDATES_TAB=true` masque cet onglet.
+
+Pour mettre à jour :
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+Les images sont republiées automatiquement quand une nouvelle version de PDM
+sort (workflow `auto-update`, hebdomadaire), et le tag de l'image reflète la
+version PDM embarquée (ex. `1.1.4`). Le timer apt quotidien de PDM est inerte
+dans le conteneur (aucun `systemd`/`cron` n'y tourne), il n'effectue donc aucun
+check ni upgrade automatique.
 
 ## Persistance
 
@@ -165,6 +185,7 @@ realm and the configured password.
 | `PDM_ROOT_PASSWORD`        | —       | `root@pam` password, applied on first start.           |
 | `PDM_PORT`                 | `8443`  | HTTPS port for the UI/API.                             |
 | `DISABLE_SUBSCRIPTION_NAG` | `false` | When `true`, hides the "No valid subscription" dialog. |
+| `DISABLE_UPDATES_TAB`      | `false` | When `true`, hides the "Updates" tab (updates are done by image, see below). |
 | `DISABLE_ENTERPRISE_REPO`  | `false` | When `true`, disables the enterprise apt repository (avoids 401s on `apt update` without a subscription). |
 
 If `PDM_ROOT_PASSWORD` is not provided, set the password manually:
@@ -181,6 +202,24 @@ interceptor to `index.hbs` that rewrites the response of
 `/nodes/localhost/subscription` (`status` → `active`), which prevents the dialog
 from being shown. The server binaries are not modified, and the change is
 reversible (set the variable back to `false` and restart).
+
+#### Updates
+
+PDM is updated **by swapping the image**, not via `apt` inside the container:
+an `apt upgrade` run from the "Updates" tab would land in the container layer
+(lost on the next recreate) and may fail without systemd. That is why
+`DISABLE_UPDATES_TAB=true` hides that tab.
+
+To update:
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+Images are republished automatically when a new PDM version ships (`auto-update`
+workflow, weekly), and the image tag mirrors the bundled PDM version (e.g.
+`1.1.4`). PDM's daily apt timer is inert in the container (no `systemd`/`cron`
+runs), so it performs no automatic check or upgrade.
 
 ### Persistence
 

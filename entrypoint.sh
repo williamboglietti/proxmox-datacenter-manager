@@ -59,23 +59,41 @@ chown root:www-data "$LOG_DIR"
 chmod 0755 "$LOG_DIR"
 chown -R www-data:www-data "$DATA_DIR"
 
-# --- 3. Option : masquer le popup "Aucun abonnement en cours de validité" ------
+# --- 3. Options : patches HTML optionnels injectés dans index.hbs --------------
+# Chaque patch est encadré par des marqueurs BEGIN/END pour pouvoir l'ajouter et
+# le retirer indépendamment des autres (toggles idempotents).
 INDEX_HBS="/usr/share/javascript/proxmox-datacenter-manager/index.hbs"
 NAG_PATCH="/usr/local/share/pdm/disable-subscription-nag.html"
-if [[ -f "$INDEX_HBS" ]]; then
-    if [[ "${DISABLE_SUBSCRIPTION_NAG:-false}" == "true" ]]; then
-        if ! grep -q "pdm-disable-subscription-nag" "$INDEX_HBS"; then
-            log "DISABLE_SUBSCRIPTION_NAG=true: hiding the subscription dialog."
-            cat "$NAG_PATCH" >> "$INDEX_HBS"
-        fi
-    elif grep -q "pdm-disable-subscription-nag" "$INDEX_HBS"; then
-        # Toggle off : on retire le patch précédemment ajouté (du marqueur à la fin).
-        log "DISABLE_SUBSCRIPTION_NAG disabled: removing the subscription patch."
-        sed -i '/pdm-disable-subscription-nag/,$d' "$INDEX_HBS"
-    fi
+UPDATES_PATCH="/usr/local/share/pdm/disable-updates-tab.html"
+
+apply_html_patch() { # $1=marqueur $2=fichier
+    [[ -f "$INDEX_HBS" && -f "$2" ]] || return 0
+    grep -q "BEGIN $1" "$INDEX_HBS" && return 0
+    { echo "<!-- BEGIN $1 -->"; cat "$2"; echo "<!-- END $1 -->"; } >> "$INDEX_HBS"
+}
+remove_html_patch() { # $1=marqueur
+    [[ -f "$INDEX_HBS" ]] || return 0
+    grep -q "BEGIN $1" "$INDEX_HBS" || return 0
+    sed -i "/<!-- BEGIN $1 -->/,/<!-- END $1 -->/d" "$INDEX_HBS"
+}
+
+# 3a. Masquer le popup "Aucun abonnement en cours de validité".
+if [[ "${DISABLE_SUBSCRIPTION_NAG:-false}" == "true" ]]; then
+    log "DISABLE_SUBSCRIPTION_NAG=true: hiding the subscription dialog."
+    apply_html_patch "pdm-disable-subscription-nag" "$NAG_PATCH"
+else
+    remove_html_patch "pdm-disable-subscription-nag"
 fi
 
-# --- 3b. Option : désactiver le dépôt apt enterprise (401 sans abonnement) ------
+# 3b. Masquer l'onglet "Mises à jour" (les MAJ se font par image, pas par apt).
+if [[ "${DISABLE_UPDATES_TAB:-false}" == "true" ]]; then
+    log "DISABLE_UPDATES_TAB=true: hiding the Updates tab."
+    apply_html_patch "pdm-disable-updates-tab" "$UPDATES_PATCH"
+else
+    remove_html_patch "pdm-disable-updates-tab"
+fi
+
+# --- 3c. Option : désactiver le dépôt apt enterprise (401 sans abonnement) ------
 # Le paquet container-meta ajoute pdm-enterprise.sources, inutile sur une install
 # no-subscription : il fait échouer chaque `apt update` (401 Unauthorized).
 ENTERPRISE_SOURCES="/etc/apt/sources.list.d/pdm-enterprise.sources"

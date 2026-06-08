@@ -1,0 +1,10 @@
+<style>
+/* Masque l'onglet « Mises à jour » de la vue Administration.
+   Les mises à jour de PDM se font en changeant d'image (docker compose pull),
+   pas via apt dans le conteneur (perdu au recreate, peut casser sans systemd).
+   Ciblage indépendant de la langue : cet onglet est le seul nav-link à porter
+   l'icône fa-refresh (vérifié : 1 seule occurrence dans l'UI). */
+a.pwt-nav-link:has(> span > .fa-refresh) {
+  display: none !important;
+}
+</style>

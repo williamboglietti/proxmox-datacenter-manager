@@ -15,6 +15,8 @@ services:
       PDM_ROOT_PASSWORD: "change-me"
       # Masquer le popup "Aucun abonnement en cours de validité" (true/false).
       DISABLE_SUBSCRIPTION_NAG: "false"
+      # Masquer l'onglet "Mises à jour" (MAJ par image, pas par apt) (true/false).
+      DISABLE_UPDATES_TAB: "false"
       # Désactiver le dépôt apt enterprise (évite les 401 sur `apt update`
       # sans abonnement Proxmox) (true/false).
       DISABLE_ENTERPRISE_REPO: "false"

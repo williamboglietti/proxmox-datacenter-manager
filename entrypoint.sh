@@ -83,6 +83,7 @@ UPDATES_PATCH="/usr/local/share/pdm/disable-updates-tab.html"
 POWER_PATCH="/usr/local/share/pdm/disable-power-buttons.html"
 SUB_PANEL_PATCH="/usr/local/share/pdm/disable-subscription-panel.html"
 NET_EDIT_PATCH="/usr/local/share/pdm/disable-network-edit.html"
+REPO_PATCH="/usr/local/share/pdm/disable-repositories.html"
 
 apply_html_patch() { # $1=marqueur $2=fichier
     [[ -f "$INDEX_HBS" && -f "$2" ]] || return 0
@@ -150,6 +151,16 @@ if [[ "${DISABLE_NETWORK_EDIT:-true}" == "true" ]]; then
     apply_html_patch "pdm-disable-network-edit" "$NET_EDIT_PATCH"
 else
     remove_html_patch "pdm-disable-network-edit"
+fi
+
+# 3f. Masquer l'onglet "Dépôts" et retirer les sources apt : gérer les dépôts
+# n'a pas de sens ici (MAJ par image, ajout volatil, dépôt enterprise = apt cassé).
+if [[ "${DISABLE_REPOSITORIES:-true}" == "true" ]]; then
+    log "DISABLE_REPOSITORIES=true: hiding the Repositories tab and clearing apt sources."
+    apply_html_patch "pdm-disable-repositories" "$REPO_PATCH"
+    rm -f /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list /etc/apt/sources.list 2>/dev/null || true
+else
+    remove_html_patch "pdm-disable-repositories"
 fi
 
 # --- 4. journald standalone (alimente l'onglet « Journal système » de l'UI) ----

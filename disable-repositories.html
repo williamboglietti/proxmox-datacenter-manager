@@ -1,0 +1,8 @@
+<style>
+/* Masque l'onglet « Dépôts » de la vue Administration : gérer les dépôts apt n'a
+   pas de sens dans le conteneur (MAJ par image, sources retirées au démarrage).
+   Ciblage par l'icône fa-files-o (unique à cet onglet). */
+a.pwt-nav-link:has(> span > .fa-files-o) {
+  display: none !important;
+}
+</style>

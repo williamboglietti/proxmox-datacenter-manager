@@ -22,7 +22,7 @@ services:
       # Mot de passe root@pam, appliqué au premier démarrage. À changer.
       PDM_ROOT_PASSWORD: "change-me"
       # Masquer le popup "Aucun abonnement en cours de validité" (true/false).
-      DISABLE_SUBSCRIPTION_NAG: "false"
+      DISABLE_SUBSCRIPTION_NAG: "true"
       # Masquer l'onglet "Mises à jour" (MAJ par image, pas par apt) (true/false).
       # Défaut "true" : un upgrade apt depuis l'UI casserait le conteneur.
       DISABLE_UPDATES_TAB: "true"

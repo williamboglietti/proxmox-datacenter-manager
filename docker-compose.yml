@@ -18,9 +18,6 @@ services:
       # Masquer l'onglet "Mises à jour" (MAJ par image, pas par apt) (true/false).
       # Défaut "true" : un upgrade apt depuis l'UI casserait le conteneur.
       DISABLE_UPDATES_TAB: "true"
-      # Désactiver le dépôt apt enterprise (évite les 401 sur `apt update`
-      # sans abonnement Proxmox) (true/false).
-      DISABLE_ENTERPRISE_REPO: "false"
       # Port HTTPS de l'UI (laisser 8443 sauf besoin spécifique).
       # PDM_PORT: "8443"
     # Alternative : déporter les variables ci-dessus dans un fichier .env

@@ -42,6 +42,9 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         proxmox-datacenter-manager-container-meta \
         proxmox-datacenter-manager-ui && \
+    # container-meta ajoute le dépôt enterprise : inutile sur une image
+    # no-subscription (401 sur apt update) et trompeur — on le retire.
+    rm -f /etc/apt/sources.list.d/pdm-enterprise.sources && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 5. Dossiers runtime et de persistance.

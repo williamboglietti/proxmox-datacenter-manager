@@ -9,6 +9,10 @@ services:
     hostname: pdm                   # nom du nœud affiché par PDM (sinon = ID du conteneur)
     platform: linux/amd64           # PDM est disponible en amd64 uniquement
     restart: unless-stopped
+    # Bridge Docker par défaut (pas le réseau custom de Compose) : les DNS ci-dessous
+    # apparaissent en direct dans /etc/resolv.conf (et dans l'UI PDM) au lieu du
+    # resolver interne 127.0.0.11. Convient à ce conteneur unique.
+    network_mode: bridge
     ports:
       - "8443:8443"                 # UI web HTTPS
     # DNS du conteneur (sinon hérité du démon Docker). Reflété tel quel dans l'UI PDM.

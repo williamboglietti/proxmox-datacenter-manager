@@ -26,6 +26,13 @@ services:
     volumes:
       - pdm-config:/etc/proxmox-datacenter-manager   # config, certificats, clés
       - pdm-data:/var/lib/proxmox-datacenter-manager # état, base de données
+    # L'image embarque déjà un HEALTHCHECK ; redéfini ici pour visibilité/ajustement.
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--insecure", "https://localhost:8443/api2/json/ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
 
 volumes:
   pdm-config:

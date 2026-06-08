@@ -62,6 +62,10 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 8443
 
+# Santé : l'API répond "pong" sur /api2/json/ping (port = PDM_PORT, défaut 8443).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD curl -fsS --insecure "https://localhost:${PDM_PORT:-8443}/api2/json/ping" || exit 1
+
 VOLUME ["/etc/proxmox-datacenter-manager", "/var/lib/proxmox-datacenter-manager"]
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/entrypoint.sh"]

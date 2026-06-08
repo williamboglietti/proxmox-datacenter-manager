@@ -69,7 +69,20 @@ UPDATES_PATCH="/usr/local/share/pdm/disable-updates-tab.html"
 apply_html_patch() { # $1=marqueur $2=fichier
     [[ -f "$INDEX_HBS" && -f "$2" ]] || return 0
     grep -q "BEGIN $1" "$INDEX_HBS" && return 0
-    { echo "<!-- BEGIN $1 -->"; cat "$2"; echo "<!-- END $1 -->"; } >> "$INDEX_HBS"
+    local tmp; tmp="$(mktemp)"
+    { echo "<!-- BEGIN $1 -->"; cat "$2"; echo "<!-- END $1 -->"; } > "$tmp"
+    # Insérer dans le <head> : l'UI (Yew/WASM) réécrit le <body> au démarrage,
+    # ce qui effacerait un <style> placé là ; le <head> est préservé. Un patch
+    # après </html> n'est pas appliqué du tout. Fallback append si pas de </head>.
+    if grep -q '</head>' "$INDEX_HBS"; then
+        awk -v patch="$tmp" '
+            /<\/head>/ && !done { while ((getline l < patch) > 0) print l; close(patch); done=1 }
+            { print }
+        ' "$INDEX_HBS" > "$INDEX_HBS.tmp" && mv "$INDEX_HBS.tmp" "$INDEX_HBS"
+    else
+        cat "$tmp" >> "$INDEX_HBS"
+    fi
+    rm -f "$tmp"
 }
 remove_html_patch() { # $1=marqueur
     [[ -f "$INDEX_HBS" ]] || return 0

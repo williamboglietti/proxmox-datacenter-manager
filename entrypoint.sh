@@ -59,6 +59,19 @@ chown root:www-data "$LOG_DIR"
 chmod 0755 "$LOG_DIR"
 chown -R www-data:www-data "$DATA_DIR"
 
+# --- 2b. Fuseau horaire (déclaratif via la variable TZ) ------------------------
+# /etc/timezone vit dans la couche conteneur (volatile) ; TZ le réapplique à
+# chaque démarrage, ce qui est persistant et reproductible.
+if [[ -n "${TZ:-}" ]]; then
+    if [[ -f "/usr/share/zoneinfo/$TZ" ]]; then
+        ln -sf "/usr/share/zoneinfo/$TZ" /etc/localtime
+        echo "$TZ" > /etc/timezone
+        log "Timezone set to $TZ."
+    else
+        warn "TZ='$TZ' is invalid (zoneinfo not found); ignoring."
+    fi
+fi
+
 # --- 3. Options : patches HTML optionnels injectés dans index.hbs --------------
 # Chaque patch est encadré par des marqueurs BEGIN/END pour pouvoir l'ajouter et
 # le retirer indépendamment des autres (toggles idempotents).
@@ -67,6 +80,7 @@ NAG_PATCH="/usr/local/share/pdm/disable-subscription-nag.html"
 UPDATES_PATCH="/usr/local/share/pdm/disable-updates-tab.html"
 POWER_PATCH="/usr/local/share/pdm/disable-power-buttons.html"
 SUB_PANEL_PATCH="/usr/local/share/pdm/disable-subscription-panel.html"
+NET_EDIT_PATCH="/usr/local/share/pdm/disable-network-edit.html"
 
 apply_html_patch() { # $1=marqueur $2=fichier
     [[ -f "$INDEX_HBS" && -f "$2" ]] || return 0
@@ -125,6 +139,15 @@ if [[ "${DISABLE_SUBSCRIPTION_PANEL:-true}" == "true" ]]; then
     apply_html_patch "pdm-disable-subscription-panel" "$SUB_PANEL_PATCH"
 else
     remove_html_patch "pdm-disable-subscription-panel"
+fi
+
+# 3e. Vue "Réseau et heure" : retirer l'édition heure/DNS et la section réseau.
+# Défaut "true" : heure -> TZ, DNS -> --dns, réseau -> Docker. Affichage conservé.
+if [[ "${DISABLE_NETWORK_EDIT:-true}" == "true" ]]; then
+    log "DISABLE_NETWORK_EDIT=true: locking the Network/Time view (read-only)."
+    apply_html_patch "pdm-disable-network-edit" "$NET_EDIT_PATCH"
+else
+    remove_html_patch "pdm-disable-network-edit"
 fi
 
 # --- 4. journald standalone (alimente l'onglet « Journal système » de l'UI) ----

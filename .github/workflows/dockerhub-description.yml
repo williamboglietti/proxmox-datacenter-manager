@@ -1,0 +1,24 @@
+name: Update Docker Hub description
+
+# Pousse le README comme overview Docker Hub. Léger (pas de build d'image).
+# Nécessite que DOCKERHUB_TOKEN ait le droit d'écriture sur le dépôt.
+
+on:
+  push:
+    branches: [main]
+    paths: ["README.md", ".github/workflows/dockerhub-description.yml"]
+  workflow_dispatch:
+
+jobs:
+  description:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sync README to Docker Hub
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/proxmox-datacenter-manager
+          readme-filepath: ./README.md
+          short-description: "Containerized Proxmox Datacenter Manager — amd64, no systemd, hardened UI"

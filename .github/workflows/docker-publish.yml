@@ -94,7 +94,5 @@ jobs:
             done
           done
 
-      # Sync de la description Docker Hub : retiré car le token de push (Read/Write
-      # images) n'a pas le droit de modifier la description (403 Forbidden). Pour
-      # l'activer, ajouter un secret DOCKERHUB_README_TOKEN (PAT « Read, Write &
-      # Delete ») et réintroduire l'étape peter-evans/dockerhub-description.
+      # La description Docker Hub est synchronisée par le workflow dédié
+      # dockerhub-description.yml (déclenché quand README.md change).
